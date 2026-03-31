@@ -11,7 +11,7 @@ const char* ssid = "Cat S22 FLIP 6874";
 const char* password = "zaozaozao";
 
 // Your Computer's IP Address (Check via ipconfig/ifconfig)
-IPAddress outIp(192,168,74,6); 
+IPAddress outIp(192,168,87,6); 
 const unsigned int outPort = 8000; // Send to Max on this port
 const unsigned int localPort = 8888; // Listen on this port
 
@@ -25,8 +25,8 @@ MicroOscUdp<1024> osc(&myUdp, outIp, outPort);
 
 CodeCell myCodeCell;
 
-float lin_x = 0.0; lin_y = 0.0; lin_z = 0.0; // Linear accelerometer motion 
-float accl_x = 0.0; accl_y = 0.0; accl_z = 0.0; // raw accelerometer
+float lin_x = 0.0; float lin_y = 0.0; float lin_z = 0.0; // Linear accelerometer motion 
+float accl_x = 0.0; float accl_y = 0.0; float accl_z = 0.0; // raw accelerometer
 
 // Raw angles from IMU (typically -180° to +180°)
 float rollRaw = 0.0; float pitchRaw = 0.0; float yawRaw = 0.0;
@@ -60,13 +60,7 @@ void setup() {
   
   // --- SENSOR SETUP ---
   // We use MOTION_LINEAR_ACC to ignore gravity (Gravity = 0 when standing still)
-  myCodeCell.Init(MOTION_LINEAR_ACC); 
-  myCodeCell.Init(MOTION_ACCELEROMETER); 
-  myCodeCell.Init(MOTION_ROTATION);  // Enable rotation sensing with magnetometer enabled
-  myCodeCell.Init(MOTION_MAGNETOMETER);        // Initialize the magnetometer
-  myCodeCell.Init(MOTION_GYRO);            // Enable gyroscope sensing
-  myCodeCell.Init(MOTION_TAP_DETECTOR); // Enable tap detection on the motion sensor
-
+  myCodeCell.Init(MOTION_LINEAR_ACC + MOTION_ACCELEROMETER + MOTION_ROTATION + MOTION_MAGNETOMETER + MOTION_GYRO + MOTION_TAP_DETECTOR);
 }
 
 void loop() {
@@ -96,9 +90,17 @@ void loop() {
 
     bool tapped = myCodeCell.Motion_TapDetectorRead();
     
-    osc.sendMessage("/impact", "f", energy);
 
-    // Optional: Print to Serial to verify
+    //
+    // OSC MESSAGE SEND 
+    //
+    
+    osc.sendMessage("/codecell_01", "fffffffffffffffffb", energy, lin_x, lin_y, lin_z, accl_x, accl_y, accl_z, 
+                          rollRaw, pitchRaw, yawRaw,roll360, pitch360, yaw360, heading, gyro_x, gyro_y, gyro_z, tapped);
+    
+    // 
+    // SERIAL PRINT VALUES
+    //
     Serial.print("Energy: "); Serial.println(energy);
     
     Serial.print("lin_x: "); Serial.print(lin_x);   
@@ -115,8 +117,10 @@ void loop() {
 
     Serial.print("Compass Heading: "); Serial.println(heading);
 
-    Serial.print("Gyro Z: "); Serial.println(z);  // Print Z-axis rotation speed to Serial
+    Serial.print("Gyro x: "); Serial.println(gyro_x);  // Print Z-axis rotation speed to Serial
+    Serial.print("Gyro y: "); Serial.println(gyro_y);  // Print Z-axis rotation speed to Serial
+    Serial.print("Gyro z: "); Serial.println(gyro_z);  // Print Z-axis rotation speed to Serial
 
-    Serial.print("Tapped : "); Serial.println(heading);    
+    Serial.print("Tapped : "); Serial.println(tapped);    
   }
 }
