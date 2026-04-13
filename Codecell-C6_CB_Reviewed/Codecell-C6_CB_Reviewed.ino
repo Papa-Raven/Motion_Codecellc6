@@ -5,11 +5,11 @@
 #include <MicroOscUdp.h> // Using specific UDP header
 
 // Wifi
-const char* ssid = "Cat S22 FLIP 6874"; //My phone
+const char* ssid = "Cat S22 FLIP 6874"; //My phone hotspot
 const char* password = "zaozaozao";
 
 // IP Computer
-IPAddress outIp(192,168,79,6); 
+IPAddress outIp(192,168,79,6); // Computer IP when connected to phone hotspot
 const unsigned int outPort = 8000; // Send to Max on this port
 const unsigned int localPort = 8888; // Listen on this port
 
